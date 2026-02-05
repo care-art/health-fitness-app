@@ -2,8 +2,19 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    
+    <!-- 国产浏览器适配 -->
+    <meta name="format-detection" content="telephone=no,email=no,address=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="screen-orientation" content="portrait" />
+    <meta name="x5-orientation" content="portrait" />
+    <meta name="x5-fullscreen" content="true" />
+    <meta name="x5-page-mode" content="app" />
+    <meta name="browsermode" content="application" />
+    <meta name="msapplication-tap-highlight" content="no" />
     
     <!-- SEO Meta Tags -->
     <title>健康健身助手 - BMI计算器、体脂率、营养计划 | 免费在线健康工具</title>
@@ -14,22 +25,22 @@
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://health-fitness-app.vercel.app/" />
+    <meta property="og:url" content="https://your-username.gitee.io/health-fitness-app/" />
     <meta property="og:title" content="健康健身助手 - 免费在线健康计算工具" />
     <meta property="og:description" content="提供BMI、体脂率、基础代谢率、运动消耗等多种健康计算器，助您科学管理健康。" />
-    <meta property="og:image" content="https://health-fitness-app.vercel.app/og-image.png" />
+    <meta property="og:image" content="./og-image.png" />
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://health-fitness-app.vercel.app/" />
+    <meta property="twitter:url" content="https://your-username.gitee.io/health-fitness-app/" />
     <meta property="twitter:title" content="健康健身助手 - 免费在线健康计算工具" />
     <meta property="twitter:description" content="提供BMI、体脂率、基础代谢率、运动消耗等多种健康计算器，助您科学管理健康。" />
-    <meta property="twitter:image" content="https://health-fitness-app.vercel.app/og-image.png" />
+    <meta property="twitter:image" content="./og-image.png" />
     
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://health-fitness-app.vercel.app/" />
+    <link rel="canonical" href="https://your-username.gitee.io/health-fitness-app/" />
     
-    <!-- Preconnect to Google Fonts -->
+    <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     
@@ -44,7 +55,7 @@
       "@type": "WebApplication",
       "name": "健康健身助手",
       "description": "免费在线健康健身计算器集合，包括BMI、体脂率、基础代谢率等计算工具",
-      "url": "https://health-fitness-app.vercel.app/",
+      "url": "https://your-username.gitee.io/health-fitness-app/",
       "applicationCategory": "HealthApplication",
       "operatingSystem": "Any",
       "offers": {
@@ -67,6 +78,14 @@
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="./src/main.tsx"></script>
+    
+    <!-- 国产浏览器兼容性提示 -->
+    <noscript>
+      <div style="padding: 20px; text-align: center; font-family: 'Microsoft YaHei', sans-serif;">
+        <h2>请启用 JavaScript</h2>
+        <p>健康健身助手需要 JavaScript 才能正常运行。请检查浏览器设置并启用 JavaScript。</p>
+      </div>
+    </noscript>
   </body>
 </html>
