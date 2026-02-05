@@ -1,0 +1,38 @@
+# Gitee Pages 部署配置
+# 将此文件内容复制到 Gitee 仓库的 WebIDE 中创建 .gitee-ci.yml
+
+stages:
+  - install
+  - build
+  - deploy
+
+# 安装依赖
+install:
+  stage: install
+  image: node:18-alpine
+  script:
+    - npm ci
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+
+# 构建项目
+build:
+  stage: build
+  image: node:18-alpine
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 hour
+
+# 部署到 Gitee Pages
+deploy:
+  stage: deploy
+  image: registry.cn-shenzhen.aliyuncs.com/gitee-go/gitee-pages-cli:latest
+  script:
+    - gitee-pages deploy --branch=main --build-dir=dist
+  only:
+    - main
