@@ -1,4 +1,18 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://health-fitness-app.vercel.app/sitemap.xml
+# Sitemap
+Sitemap: https://your-username.gitee.io/health-fitness-app/sitemap.xml
+
+# BMI Calculator specific optimization
+Allow: /bmi
+Allow: /calculator
+Allow: /health
+
+# Crawl delay for better server performance
+Crawl-delay: 1
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /private/
+Disallow: /api/
