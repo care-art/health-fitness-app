@@ -135,7 +135,7 @@ export const LanguageSwitcher: React.FC = () => {
 
 // 简化的语言切换按钮（用于移动端）
 export const LanguageSwitcherCompact: React.FC = () => {
-  const { languageConfig, setLanguage, supportedLanguages, t } = useLanguage();
+  const { languageConfig, setLanguage, supportedLanguages } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
