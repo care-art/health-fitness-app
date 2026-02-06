@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
+import type { Language } from '../i18n/config';
 import { Icon } from './common';
 
 export const LanguageSwitcher: React.FC = () => {
@@ -18,8 +19,9 @@ export const LanguageSwitcher: React.FC = () => {
   
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleLanguageChange = (langCode: string) => {
-    setLanguage(langCode as any);
+  const handleLanguageChange = (langCode: Language) => {
+    console.log('Switching to language:', langCode);
+    setLanguage(langCode);
     setIsOpen(false);
   };
 
@@ -138,6 +140,12 @@ export const LanguageSwitcherCompact: React.FC = () => {
   const { languageConfig, setLanguage, supportedLanguages } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
 
+  const handleLanguageSelect = (langCode: Language) => {
+    console.log('Mobile: Switching to language:', langCode);
+    setLanguage(langCode);
+    setIsOpen(false);
+  };
+
   return (
     <div className="relative">
       <button
@@ -155,10 +163,7 @@ export const LanguageSwitcherCompact: React.FC = () => {
             {supportedLanguages.map((lang) => (
               <button
                 key={lang.code}
-                onClick={() => {
-                  setLanguage(lang.code as any);
-                  setIsOpen(false);
-                }}
+                onClick={() => handleLanguageSelect(lang.code)}
                 className={`w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 ${
                   languageConfig.code === lang.code ? 'bg-emerald-50 text-emerald-700' : 'text-gray-700'
                 }`}
