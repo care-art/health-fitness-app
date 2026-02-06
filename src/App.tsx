@@ -12,11 +12,14 @@ import {
 import { HistoryView } from './components/HistoryView';
 import { navItems } from './data/navigation';
 import { Icon, StyledAppIcon } from './components/common';
+import { LanguageSwitcher, LanguageSwitcherCompact } from './components/LanguageSwitcher';
+import { useLanguage } from './i18n/LanguageContext';
 import type { CalculatorType } from './types';
 
 function App() {
   const [activeTab, setActiveTab] = useState<CalculatorType>('bmi');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t, languageConfig } = useLanguage();
 
   const renderCalculator = () => {
     switch (activeTab) {
@@ -46,7 +49,7 @@ function App() {
   const currentNavItem = navItems.find(item => item.id === activeTab);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50" dir={languageConfig.direction}>
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -57,23 +60,36 @@ function App() {
                 <Icon name="Heart" size={20} color="white" strokeWidth={2.5} />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 tracking-tight">健康健身助手</h1>
-                <p className="text-xs text-gray-500">您的个人健康管理专家</p>
+                <h1 className="text-xl font-bold text-gray-900 tracking-tight">{t('common.appName')}</h1>
+                <p className="text-xs text-gray-500">{t('common.appDescription')}</p>
               </div>
             </div>
 
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl hover:bg-gray-100 transition-colors"
-            >
-              <Icon 
-                name={isMobileMenuOpen ? 'X' : 'Menu'} 
-                size={24} 
-                className="text-gray-600"
-                strokeWidth={2.5}
-              />
-            </button>
+            {/* Right Section: Language Switcher & Mobile Menu */}
+            <div className="flex items-center gap-3">
+              {/* Language Switcher - Desktop */}
+              <div className="hidden lg:block">
+                <LanguageSwitcher />
+              </div>
+              
+              {/* Language Switcher - Mobile */}
+              <div className="lg:hidden">
+                <LanguageSwitcherCompact />
+              </div>
+
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="lg:hidden p-2 rounded-xl hover:bg-gray-100 transition-colors"
+              >
+                <Icon 
+                  name={isMobileMenuOpen ? 'X' : 'Menu'} 
+                  size={24} 
+                  className="text-gray-600"
+                  strokeWidth={2.5}
+                />
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -110,7 +126,7 @@ function App() {
                       className={isActive ? 'opacity-90' : ''}
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm">{item.label}</p>
+                      <p className="font-semibold text-sm">{t(`nav.${item.id}`)}</p>
                       <p className={`text-xs mt-0.5 ${isActive ? 'text-emerald-100' : 'text-gray-500'}`}>
                         {item.description}
                       </p>
@@ -130,9 +146,9 @@ function App() {
                   <Icon name="Lightbulb" size={20} color="white" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold mb-1">健康小贴士</p>
+                  <p className="text-sm font-semibold mb-1">{t('tips.title')}</p>
                   <p className="text-xs text-blue-100 leading-relaxed">
-                    保持规律运动，均衡饮食，每天至少喝8杯水，保证充足睡眠。
+                    {t('tips.daily.0')}
                   </p>
                 </div>
               </div>
@@ -153,7 +169,7 @@ function App() {
                     />
                   )}
                   <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
-                    {currentNavItem?.label}
+                    {currentNavItem ? t(`nav.${currentNavItem.id}`) : ''}
                   </h2>
                 </div>
                 <p className="text-gray-600 ml-14">
@@ -178,10 +194,10 @@ function App() {
               <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
                 <Icon name="Heart" size={16} color="white" strokeWidth={2.5} />
               </div>
-              <span className="text-sm text-gray-600">健康健身助手</span>
+              <span className="text-sm text-gray-600">{t('common.appName')}</span>
             </div>
             <p className="text-sm text-gray-500 text-center">
-              © 2024 健康健身助手 | 本应用仅供参考，不能替代专业医疗建议
+              © 2024 {t('common.appName')} | {t('common.appDescription')}
             </p>
             <div className="flex items-center gap-4">
               <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-lg">
