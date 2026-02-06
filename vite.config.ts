@@ -19,20 +19,6 @@ export default defineConfig({
           'vendor': ['react', 'react-dom'],
           'icons': ['lucide-react'],
         },
-        // 确保资源路径正确
-        entryFileNames: 'assets/[name]-[hash].js',
-        chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: (assetInfo) => {
-          const info = assetInfo.name.split('.')
-          const ext = info[info.length - 1]
-          if (/\.(png|jpe?g|gif|svg|webp|ico)$/i.test(assetInfo.name)) {
-            return 'assets/images/[name]-[hash][extname]'
-          }
-          if (/\.css$/i.test(assetInfo.name)) {
-            return 'assets/css/[name]-[hash][extname]'
-          }
-          return 'assets/[name]-[hash][extname]'
-        },
       },
     },
   },

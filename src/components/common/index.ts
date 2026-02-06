@@ -12,3 +12,6 @@ export {
   iconColorMap,
 } from './Icon';
 export type { IconName } from './Icon';
+
+// 广告组件
+export { AdBanner, AdInArticle, AdSidebar } from './AdBanner';
