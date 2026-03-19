@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Input, Button, Card } from '../common';
-import { calculateBMI, getBMICategoryInfo, getIdealWeightRange } from '../../utils/calculations';
+import { calculateBMI, getIdealWeightRange } from '../../utils/calculations';
 import { useHealthHistory } from '../../hooks/useLocalStorage';
+import { useLanguage } from '../../i18n/LanguageContext';
 import type { BMIResult } from '../../types';
 
 export const BMICalculator: React.FC = () => {
@@ -11,38 +12,38 @@ export const BMICalculator: React.FC = () => {
   const [result, setResult] = useState<BMIResult | null>(null);
   const [errors, setErrors] = useState<{ height?: string; weight?: string }>({});
   const { addRecord } = useHealthHistory();
+  const { t } = useLanguage();
 
   const validateInputs = (): boolean => {
     const newErrors: { height?: string; weight?: string } = {};
-    
+
     const heightNum = parseFloat(height);
     const weightNum = parseFloat(weight);
-    
+
     if (isNaN(heightNum) || heightNum <= 0) {
-      newErrors.height = unit === 'metric' ? '请输入有效的身高(cm)' : '请输入有效的身高(in)';
+      newErrors.height = t('bmi.heightPlaceholder') || 'Please enter a valid height';
     }
-    
+
     if (isNaN(weightNum) || weightNum <= 0) {
-      newErrors.weight = unit === 'metric' ? '请输入有效的体重(kg)' : '请输入有效的体重(lbs)';
+      newErrors.weight = t('bmi.weightPlaceholder') || 'Please enter a valid weight';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleCalculate = () => {
     if (!validateInputs()) return;
-    
+
     const input = {
       height: parseFloat(height),
       weight: parseFloat(weight),
       unit,
     };
-    
+
     const bmiResult = calculateBMI(input);
     setResult(bmiResult);
-    
-    // Save to history
+
     addRecord('bmi', {
       height: input.height,
       weight: input.weight,
@@ -71,14 +72,21 @@ export const BMICalculator: React.FC = () => {
 
   const idealWeight = result ? getIdealWeightRange(parseFloat(height), unit) : null;
 
+  const getCategoryLabel = (category: string): string => {
+    return t(`bmi.categories.${category}`) || category;
+  };
+
+  const getRecommendation = (category: string): string => {
+    return t(`bmi.adviceList.${category}`) || '';
+  };
+
   return (
     <div className="space-y-6">
-      <Card 
-        title="BMI 计算器" 
-        description="身体质量指数(BMI)是衡量体重与身高关系的国际标准"
+      <Card
+        title={t('bmi.title')}
+        description={t('bmi.description')}
         icon="⚖️"
       >
-        {/* Unit Toggle */}
         <div className="flex gap-2 mb-6">
           <button
             onClick={() => {
@@ -91,7 +99,7 @@ export const BMICalculator: React.FC = () => {
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            公制 (cm/kg)
+            {t('bmi.metric')} (cm/kg)
           </button>
           <button
             onClick={() => {
@@ -104,65 +112,60 @@ export const BMICalculator: React.FC = () => {
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            英制 (in/lbs)
+            {t('bmi.imperial')} (in/lbs)
           </button>
         </div>
 
-        {/* Input Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
-            label={unit === 'metric' ? '身高' : '身高'}
+            label={t('bmi.height')}
             type="number"
             value={height}
             onChange={(e) => setHeight(e.target.value)}
             placeholder={unit === 'metric' ? '170' : '67'}
-            unit={unit === 'metric' ? 'cm' : 'in'}
+            unit={unit === 'metric' ? t('bmi.cm') : 'in'}
             error={errors.height}
           />
           <Input
-            label={unit === 'metric' ? '体重' : '体重'}
+            label={t('bmi.weight')}
             type="number"
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
             placeholder={unit === 'metric' ? '65' : '143'}
-            unit={unit === 'metric' ? 'kg' : 'lbs'}
+            unit={unit === 'metric' ? t('bmi.kg') : 'lbs'}
             error={errors.weight}
           />
         </div>
 
-        {/* Action Buttons */}
         <div className="flex gap-3 mt-6">
           <Button onClick={handleCalculate} size="lg" className="flex-1">
-            计算 BMI
+            {t('bmi.calculate')}
           </Button>
           <Button onClick={handleReset} variant="outline" size="lg">
-            重置
+            {t('common.reset')}
           </Button>
         </div>
       </Card>
 
-      {/* Results */}
       {result && (
         <div className="space-y-4">
-          {/* BMI Result Card */}
           <Card className={getResultColor(result.category)}>
             <div className="text-center">
-              <p className="text-sm font-medium opacity-80">您的 BMI 指数</p>
+              <p className="text-sm font-medium opacity-80">{t('bmi.result')}</p>
               <p className="text-5xl font-bold my-2">{result.bmi}</p>
               <p className="text-lg font-semibold">
-                {getBMICategoryInfo(result.category).label}
+                {getCategoryLabel(result.category)}
               </p>
             </div>
           </Card>
 
-          {/* BMI Scale */}
-          <Card title="BMI 参考标准" icon="📊">
+          <Card title={t('bmi.scale')} icon="📊">
             <div className="space-y-3">
               {[
-                { label: '偏瘦', range: '< 18.5', color: 'bg-blue-500', category: 'underweight' },
-                { label: '正常', range: '18.5 - 24.9', color: 'bg-green-500', category: 'normal' },
-                { label: '超重', range: '25 - 29.9', color: 'bg-yellow-500', category: 'overweight' },
-                { label: '肥胖', range: '≥ 30', color: 'bg-red-500', category: 'obese' },
+                { label: getCategoryLabel('underweight'), range: '< 18.5', color: 'bg-blue-500', category: 'underweight' },
+                { label: getCategoryLabel('normal'), range: '18.5 - 24.9', color: 'bg-green-500', category: 'normal' },
+                { label: getCategoryLabel('overweight'), range: '25 - 29.9', color: 'bg-yellow-500', category: 'overweight' },
+                { label: getCategoryLabel('obese'), range: '≥ 30', color: 'bg-red-500', category: 'obese' },
               ].map((item) => (
                 <div
                   key={item.category}
@@ -182,24 +185,22 @@ export const BMICalculator: React.FC = () => {
             </div>
           </Card>
 
-          {/* Ideal Weight */}
           {idealWeight && (
-            <Card title="理想体重范围" icon="🎯">
+            <Card title={t('bmi.idealWeight')} icon="🎯">
               <div className="text-center py-4">
                 <p className="text-3xl font-bold text-emerald-600">
-                  {idealWeight.min} - {idealWeight.max} {unit === 'metric' ? 'kg' : 'lbs'}
+                  {idealWeight.min} - {idealWeight.max} {unit === 'metric' ? t('bmi.kg') : 'lbs'}
                 </p>
                 <p className="text-gray-600 mt-2">
-                  基于您的身高计算的健康体重范围
+                  {t('bmi.idealWeightDescription')}
                 </p>
               </div>
             </Card>
           )}
 
-          {/* Recommendation */}
-          <Card title="健康建议" icon="💡">
+          <Card title={t('bmi.advice')} icon="💡">
             <p className="text-gray-700 leading-relaxed">
-              {result.recommendation}
+              {getRecommendation(result.category)}
             </p>
           </Card>
         </div>

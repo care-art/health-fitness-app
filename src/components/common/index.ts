@@ -2,10 +2,11 @@ export { Input } from './Input';
 export { Button } from './Button';
 export { Card } from './Card';
 export { Select } from './Select';
-export { 
-  Icon, 
+export { ErrorBoundary } from './ErrorBoundary';
+export {
+  Icon,
   IconBox,
-  AppIcon, 
+  AppIcon,
   AppIconBox,
   StyledAppIcon,
   AppIcons,

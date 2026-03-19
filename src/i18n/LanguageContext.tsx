@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import type { Language, LanguageConfig } from './config';
-import { 
-  SUPPORTED_LANGUAGES, 
-  DEFAULT_LANGUAGE, 
+import {
+  SUPPORTED_LANGUAGES,
+  DEFAULT_LANGUAGE,
   STORAGE_KEY,
   getLanguageConfig,
-  isLanguageSupported 
+  isLanguageSupported
 } from './config';
 import { detectBestLanguage } from '../services/ipDetection';
 import { getTranslation, type Translation } from './translations';
@@ -30,6 +30,44 @@ interface LanguageProviderProps {
   children: ReactNode;
 }
 
+function isLocalStorageAvailable(): boolean {
+  try {
+    const testKey = '__storage_test__';
+    localStorage.setItem(testKey, testKey);
+    localStorage.removeItem(testKey);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function getStoredPreference(): { language: Language; autoDetect: boolean } | null {
+  if (!isLocalStorageAvailable()) return null;
+
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return null;
+
+    const parsed = JSON.parse(stored);
+    if (typeof parsed.language === 'string' && typeof parsed.autoDetect === 'boolean') {
+      return { language: parsed.language as Language, autoDetect: parsed.autoDetect };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function savePreference(language: Language, autoDetect: boolean): void {
+  if (!isLocalStorageAvailable()) return;
+
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ language, autoDetect }));
+  } catch {
+    // Storage full or unavailable
+  }
+}
+
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(DEFAULT_LANGUAGE);
   const [detectedLanguage, setDetectedLanguage] = useState<Language | null>(null);
@@ -38,31 +76,24 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [translation, setTranslation] = useState<Translation>(getTranslation(DEFAULT_LANGUAGE));
 
-  // 初始化语言设置
   useEffect(() => {
     const initializeLanguage = async () => {
       try {
-        // 1. 检查本地存储的用户偏好
-        const savedPreference = localStorage.getItem(STORAGE_KEY);
-        if (savedPreference) {
-          const { language: savedLang, autoDetect: savedAuto } = JSON.parse(savedPreference);
-          
-          if (!savedAuto && isLanguageSupported(savedLang)) {
-            setLanguageState(savedLang);
-            setAutoDetectState(false);
-            setTranslation(getTranslation(savedLang));
-            setIsLoading(false);
-            return;
-          }
+        const saved = getStoredPreference();
+        if (saved && !saved.autoDetect && isLanguageSupported(saved.language)) {
+          setLanguageState(saved.language);
+          setAutoDetectState(false);
+          setTranslation(getTranslation(saved.language));
+          setIsLoading(false);
+          return;
         }
 
-        // 2. 自动检测语言
         setIsLoading(true);
         const detection = await detectBestLanguage();
-        
+
         setDetectedLanguage(detection.language);
         setDetectionMethod(detection.method);
-        
+
         if (isLanguageSupported(detection.language)) {
           setLanguageState(detection.language);
           setTranslation(getTranslation(detection.language));
@@ -70,8 +101,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
           setLanguageState(DEFAULT_LANGUAGE);
           setTranslation(getTranslation(DEFAULT_LANGUAGE));
         }
-      } catch (error) {
-        console.error('Language initialization failed:', error);
+      } catch {
         setLanguageState(DEFAULT_LANGUAGE);
         setTranslation(getTranslation(DEFAULT_LANGUAGE));
       } finally {
@@ -82,52 +112,39 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     initializeLanguage();
   }, []);
 
-  // 设置语言
   const setLanguage = useCallback((lang: Language) => {
     if (isLanguageSupported(lang)) {
       setLanguageState(lang);
       setTranslation(getTranslation(lang));
-      
-      // 保存到本地存储
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        language: lang,
-        autoDetect: false,
-      }));
-      
+      savePreference(lang, false);
       setAutoDetectState(false);
     }
   }, []);
 
-  // 设置自动检测
   const setAutoDetect = useCallback((enabled: boolean) => {
     setAutoDetectState(enabled);
-    
+
     if (enabled && detectedLanguage) {
       setLanguageState(detectedLanguage);
       setTranslation(getTranslation(detectedLanguage));
     }
-    
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      language: language,
-      autoDetect: enabled,
-    }));
+
+    savePreference(language, enabled);
   }, [detectedLanguage, language]);
 
-  // 翻译函数
   const t = useCallback((key: string, params?: Record<string, string | number>): string => {
     const keys = key.split('.');
-    let value: any = translation;
-    
+    let value: unknown = translation;
+
     for (const k of keys) {
-      if (value && typeof value === 'object' && k in value) {
-        value = value[k];
+      if (value && typeof value === 'object' && k in (value as object)) {
+        value = (value as Record<string, unknown>)[k];
       } else {
-        return key; // 返回原key作为fallback
+        return key;
       }
     }
-    
+
     if (typeof value === 'string') {
-      // 替换参数
       if (params) {
         return value.replace(/\{\{(\w+)\}\}/g, (match, paramKey) => {
           const paramValue = params[paramKey];
@@ -136,7 +153,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
       }
       return value;
     }
-    
+
     return key;
   }, [translation]);
 
@@ -163,7 +180,6 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   );
 };
 
-// 自定义Hook
 export const useLanguage = (): LanguageContextType => {
   const context = useContext(LanguageContext);
   if (context === undefined) {
@@ -172,7 +188,6 @@ export const useLanguage = (): LanguageContextType => {
   return context;
 };
 
-// 简化版翻译Hook
 export const useTranslation = () => {
   const { t, language } = useLanguage();
   return { t, language };

@@ -20,7 +20,6 @@ export const LanguageSwitcher: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLanguageChange = (langCode: Language) => {
-    console.log('Switching to language:', langCode);
     setLanguage(langCode);
     setIsOpen(false);
   };
@@ -141,7 +140,6 @@ export const LanguageSwitcherCompact: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLanguageSelect = (langCode: Language) => {
-    console.log('Mobile: Switching to language:', langCode);
     setLanguage(langCode);
     setIsOpen(false);
   };
