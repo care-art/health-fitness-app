@@ -2,11 +2,13 @@ import type {
   BMIInput,
   BMIResult,
   BMICategory,
+  BMICategoryInfo,
   BMRInput,
   BMRResult,
   TDEEInput,
   TDEEResult,
   ActivityLevel,
+  ActivityLevelInfo,
   BodyFatInput,
   BodyFatResult,
   WHRInput,
@@ -19,16 +21,39 @@ import type {
   NutritionPlan,
 } from '../types';
 
-export const bmiCategories: {
-  category: BMICategory;
-  min: number;
-  max: number | null;
-  color: string;
-}[] = [
-  { category: 'underweight', min: 0, max: 18.5, color: '#3b82f6' },
-  { category: 'normal', min: 18.5, max: 24.9, color: '#10b981' },
-  { category: 'overweight', min: 25, max: 29.9, color: '#f59e0b' },
-  { category: 'obese', min: 30, max: null, color: '#ef4444' },
+export const bmiCategories: BMICategoryInfo[] = [
+  {
+    category: 'underweight',
+    label: '体重过轻',
+    min: 0,
+    max: 18.5,
+    color: '#3b82f6',
+    recommendation: '建议适当增加营养摄入，进行力量训练以增加肌肉量。咨询营养师制定增重计划。',
+  },
+  {
+    category: 'normal',
+    label: '正常',
+    min: 18.5,
+    max: 24.9,
+    color: '#10b981',
+    recommendation: '恭喜！您的体重在健康范围内。保持均衡饮食和规律运动，维持当前状态。',
+  },
+  {
+    category: 'overweight',
+    label: '超重',
+    min: 25,
+    max: 29.9,
+    color: '#f59e0b',
+    recommendation: '建议控制饮食热量，增加有氧运动。每周至少150分钟中等强度运动。',
+  },
+  {
+    category: 'obese',
+    label: '肥胖',
+    min: 30,
+    max: null,
+    color: '#ef4444',
+    recommendation: '建议咨询医生制定减重计划。控制饮食、增加运动，关注血压血糖指标。',
+  },
 ];
 
 export function calculateBMI(input: BMIInput): BMIResult {
@@ -44,10 +69,12 @@ export function calculateBMI(input: BMIInput): BMIResult {
   }
 
   const category = getBMICategory(bmi);
+  const categoryInfo = bmiCategories.find(c => c.category === category)!;
 
   return {
     bmi: Math.round(bmi * 10) / 10,
     category,
+    recommendation: categoryInfo.recommendation,
   };
 }
 
@@ -58,7 +85,7 @@ export function getBMICategory(bmi: number): BMICategory {
   return 'obese';
 }
 
-export function getBMICategoryInfo(category: BMICategory) {
+export function getBMICategoryInfo(category: BMICategory): BMICategoryInfo {
   return bmiCategories.find(c => c.category === category)!;
 }
 
@@ -77,15 +104,37 @@ export function getIdealWeightRange(height: number, unit: 'metric' | 'imperial')
   }
 }
 
-export const activityLevels: {
-  value: ActivityLevel;
-  multiplier: number;
-}[] = [
-  { value: 'sedentary', multiplier: 1.2 },
-  { value: 'lightly_active', multiplier: 1.375 },
-  { value: 'moderately_active', multiplier: 1.55 },
-  { value: 'very_active', multiplier: 1.725 },
-  { value: 'extremely_active', multiplier: 1.9 },
+export const activityLevels: ActivityLevelInfo[] = [
+  {
+    value: 'sedentary',
+    label: '久坐不动',
+    multiplier: 1.2,
+    description: '很少或不运动',
+  },
+  {
+    value: 'lightly_active',
+    label: '轻度活动',
+    multiplier: 1.375,
+    description: '每周轻度运动1-3天',
+  },
+  {
+    value: 'moderately_active',
+    label: '中度活动',
+    multiplier: 1.55,
+    description: '每周中度运动3-5天',
+  },
+  {
+    value: 'very_active',
+    label: '高度活动',
+    multiplier: 1.725,
+    description: '每周高强度运动6-7天',
+  },
+  {
+    value: 'extremely_active',
+    label: '极高活动',
+    multiplier: 1.9,
+    description: '每天高强度运动或体力工作',
+  },
 ];
 
 export function calculateBMR(input: BMRInput): BMRResult {
@@ -118,8 +167,8 @@ export function calculateTDEE(input: TDEEInput): TDEEResult {
   };
 }
 
-export function getActivityMultiplier(level: ActivityLevel): number {
-  return activityLevels.find(l => l.value === level)?.multiplier || 1.2;
+export function getActivityLevelInfo(level: ActivityLevel): ActivityLevelInfo {
+  return activityLevels.find(l => l.value === level)!;
 }
 
 export function calculateBodyFat(input: BodyFatInput): BodyFatResult {
@@ -162,6 +211,17 @@ export function getBodyFatCategory(percentage: number, gender: 'male' | 'female'
   }
 }
 
+export function getBodyFatCategoryLabel(category: BodyFatResult['category']): string {
+  const labels: Record<BodyFatResult['category'], string> = {
+    essential: '必需脂肪',
+    athletes: '运动员',
+    fitness: '健康',
+    average: '平均',
+    obese: '肥胖',
+  };
+  return labels[category];
+}
+
 export function calculateWHR(input: WHRInput): WHRResult {
   const { gender, waist, hip } = input;
 
@@ -183,6 +243,24 @@ export function calculateWHR(input: WHRInput): WHRResult {
     whr: Math.round(whr * 100) / 100,
     riskLevel,
   };
+}
+
+export function getWHRRiskLabel(riskLevel: WHRResult['riskLevel']): string {
+  const labels: Record<WHRResult['riskLevel'], string> = {
+    low: '低风险',
+    moderate: '中等风险',
+    high: '高风险',
+  };
+  return labels[riskLevel];
+}
+
+export function getWHRRecommendation(riskLevel: WHRResult['riskLevel']): string {
+  const recommendations: Record<WHRResult['riskLevel'], string> = {
+    low: '您的腰臀比处于健康范围，继续保持！',
+    moderate: '建议通过有氧运动和核心训练减少腹部脂肪。',
+    high: '建议咨询医生，制定减腹计划，降低心血管疾病风险。',
+  };
+  return recommendations[riskLevel];
 }
 
 export function calculateExerciseCalories(input: ExerciseInput): ExerciseResult {
@@ -290,36 +368,52 @@ export function generateNutritionPlan(tdee: number, goal: GoalType): NutritionPl
 
   const meals: NutritionPlan['meals'] = [
     {
-      name: 'breakfast',
+      name: '早餐',
       calories: Math.round(targetCalories * 0.25),
       protein: Math.round(protein * 0.25),
       carbs: Math.round(carbs * 0.25),
       fat: Math.round(fat * 0.25),
-      suggestions: [],
+      suggestions: goal === 'lose'
+        ? ['燕麦粥', '水煮蛋', '无糖豆浆', '全麦面包']
+        : goal === 'gain'
+        ? ['全麦面包配花生酱', '鸡蛋', '牛奶', '香蕉']
+        : ['全麦面包', '鸡蛋', '牛奶', '水果'],
     },
     {
-      name: 'lunch',
+      name: '午餐',
       calories: Math.round(targetCalories * 0.40),
       protein: Math.round(protein * 0.40),
       carbs: Math.round(carbs * 0.40),
       fat: Math.round(fat * 0.40),
-      suggestions: [],
+      suggestions: goal === 'lose'
+        ? ['鸡胸肉/鱼肉', '糙米饭(小份)', '大量蔬菜', '清汤']
+        : goal === 'gain'
+        ? ['牛肉/鸡肉', '糙米饭(大份)', '蔬菜', '汤']
+        : ['瘦肉/鱼肉', '米饭', '蔬菜', '汤'],
     },
     {
-      name: 'dinner',
+      name: '晚餐',
       calories: Math.round(targetCalories * 0.30),
       protein: Math.round(protein * 0.30),
       carbs: Math.round(carbs * 0.30),
       fat: Math.round(fat * 0.30),
-      suggestions: [],
+      suggestions: goal === 'lose'
+        ? ['鱼肉/豆腐', '蔬菜沙拉', '少量主食', '避免油腻']
+        : goal === 'gain'
+        ? ['鸡胸肉/鱼肉', '红薯/土豆', '蔬菜', '牛奶']
+        : ['瘦肉/鱼肉', '主食', '蔬菜', '适量油脂'],
     },
     {
-      name: 'snack',
+      name: '加餐',
       calories: Math.round(targetCalories * 0.05),
       protein: Math.round(protein * 0.05),
       carbs: Math.round(carbs * 0.05),
       fat: Math.round(fat * 0.05),
-      suggestions: [],
+      suggestions: goal === 'lose'
+        ? ['坚果(少量)', '无糖酸奶', '水果']
+        : goal === 'gain'
+        ? ['坚果', '酸奶', '水果', '蛋白粉']
+        : ['坚果', '酸奶', '水果'],
     },
   ];
 
@@ -334,4 +428,18 @@ export function generateNutritionPlan(tdee: number, goal: GoalType): NutritionPl
 
 export function formatNumber(num: number, decimals: number = 1): string {
   return num.toFixed(decimals);
+}
+
+export function validatePositiveNumber(value: number, fieldName: string): string | null {
+  if (isNaN(value) || value <= 0) {
+    return `${fieldName}必须大于0`;
+  }
+  return null;
+}
+
+export function validateRange(value: number, min: number, max: number, fieldName: string): string | null {
+  if (isNaN(value) || value < min || value > max) {
+    return `${fieldName}必须在${min}-${max}之间`;
+  }
+  return null;
 }
